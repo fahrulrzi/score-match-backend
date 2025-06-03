@@ -1,0 +1,88 @@
+# version: "3.8"
+
+services:
+  app:
+    image: fahrulrzi/donora:1.2.18
+    container_name: gsc
+    restart: unless-stopped
+    environment:
+      - PORT=8080
+      # Database
+      - DB_HOST=postgres-db
+      - DB_PORT=5432
+      - DB_USER=fahrul
+      - DB_PASSWORD=fahrul
+      - DB_NAME=donora
+      - DB_SSL_MODE=disable
+      # JWT
+      - JWT_SECRET=yantoTambalBan
+      - JWT_EXPIRE_TIME=24
+      # Email
+      - SMTP_HOST=smtp.gmail.com
+      - SMTP_PORT=587
+      - SENDER_EMAIL=mfahrulrazi695@gmail.com
+      - SENDER_NAME=Donora
+      - SMTP_PASSWORD=zawm hzsl jxip anin
+      # Google OAuth
+      # - GOOGLE_CLIENT_ID=746726570161-t9duivpt3j4paosvtfbiqeu6l9kfmjc5.apps.googleusercontent.com
+      # - GOOGLE_CLIENT_SECRET=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
+      # - GOOGLE_REDIRECT_URL=http://localhost:8080/api/auth/google/callback
+      # Google Auth Mobile
+      - GOOGLE_CLIENT_ID=312931443558-r2v68249hvrr9a6nqnh9p7f2g176it3e.apps.googleusercontent.com
+      # Storage
+      - STORAGE_TYPE=s3 # local atau s3
+      - LOCAL_STORAGE_PATH=./uploads
+      - LOCAL_STORAGE_URL=http://localhost:8080/uploads
+      # S3/Cloudflare R2 (hanya diperlukan jika STORAGE_TYPE=s3)
+      - S3_ACCOUNT_ID=099029c5b94d2939cc86ccb58476b708
+      - S3_ACCESS_KEY=8904c27b9847914fa07b0d21497d1812
+      - S3_SECRET_KEY=4ada48757891a9db2ce5f404eedf6ecde4a8449a7b68d075bfa452a0240edc27
+      - S3_BUCKET_NAME=donora
+      - S3_REGION=auto
+      - S3_BASE_URL=https://pub-edaa30c44dd54bf0a8c76f650df4e4dd.r2.dev
+      # Gemini API
+      - CHATBOT_API_KEY=AIzaSyAfguAzh8Sn4Q-CsOZWbUugSiHrfiqnRJc
+      # Reloadly
+      - RELOADLY_CLIENT_ID=S6gsYeifUpnaI8ngUZB6yzrSzJbhkO2m
+      - RELOADLY_CLIENT_SECRET=4gXaar5Ml8-czMWKlpNEOtLBjwx8aP-3oJDuYEtCJSl3wPXhsW35f12Bl2DZXiv
+      - RELOADLY_GRANT_TYPE=client_credentials
+      - RELOADLY_AUDIENCE=https://topups-sandbox.reloadly.com
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+    networks:
+      - app-network
+
+  postgres:
+    image: postgres:latest
+    container_name: postgres-db
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=fahrul
+      - POSTGRES_PASSWORD=fahrul
+      - POSTGRES_DB=donora
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - app-network
+
+  adminer:
+    image: adminer:latest
+    container_name: adminer
+    restart: unless-stopped
+    ports:
+      - "8081:8080"
+    depends_on:
+      - postgres
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  postgres-data:
