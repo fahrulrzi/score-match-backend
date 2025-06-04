@@ -9,6 +9,8 @@ type Customer struct {
 	Income    int       `json:"income"`
 	Age       int       `json:"age"`
 	Score     int       `json:"score"`
+	Status    string    `json:"status"`
+	Describe  string    `json:"describe"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }
@@ -25,9 +27,10 @@ type CustomerRequest struct {
 	Collateral    string `json:"collateral"`
 }
 
-type CustomerScore struct {
-	MaritalStatus int `json:"marital_status"`
-	Job           int `json:"job"`
+type CustomerScoreResponse struct {
+	Score    int    `json:"score"`
+	Status   string `json:"status"`
+	Describe string `json:"describe"`
 }
 
 var MaritalStatusScore = map[string]int{

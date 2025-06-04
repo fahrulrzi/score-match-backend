@@ -48,6 +48,8 @@ const CreateTablesSQL = `
 		income INT NOT NULL,
 		age INT NOT NULL,
 		score INT NOT NULL,
+		status TEXT NOT NULL,
+		describe TEXT NOT NULL,
 		created_at TIMESTAMP NOT NULL,
 		updated_at TIMESTAMP NOT NULL
 	);

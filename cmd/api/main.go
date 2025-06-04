@@ -18,6 +18,7 @@ import (
 	"github.com/fahrulrzi/score-match-backend/pkg/jwt"
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
+	"github.com/rs/cors"
 )
 
 func main() {
@@ -41,24 +42,38 @@ func main() {
 
 	// Initialize repositories
 	userRepo := postgres.NewUserRepository(db)
+	customerRepo := postgres.NewCustomerRepository(db)
 
 	// Initialize services
 	jwtService := jwt.NewJWTService(config.JWT.Secret, config.JWT.ExpireTime)
 
 	// Initialize use cases
 	authUseCase := usecase.NewAuthUseCase(userRepo, jwtService)
+	customerUseCase := usecase.NewCustomerUseCase(customerRepo)
 
 	// Initialize HTTP handlers
 	authHandler := handler.NewAuthHandler(authUseCase, jwtService)
+	customerHandler := handler.NewCustomerHandler(customerUseCase)
 
 	// Initialize router
 	router := mux.NewRouter()
-	routes.SetupRoutes(router, authHandler)
+	routes.SetupRoutes(router, authHandler, customerHandler)
+
+	// Setup CORS middleware
+	corsMiddleware := cors.New(cors.Options{
+		AllowedOrigins:   []string{"*"}, // frontend lo
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"Content-Type", "Authorization"},
+		AllowCredentials: true,
+	})
+
+	// Wrap router with CORS
+	handlerWithCORS := corsMiddleware.Handler(router)
 
 	// Configure HTTP server
 	server := &http.Server{
 		Addr:         ":" + config.Server.Port,
-		Handler:      router,
+		Handler:      handlerWithCORS,
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 10 * time.Second,
 		IdleTimeout:  120 * time.Second,
