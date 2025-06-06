@@ -21,49 +21,65 @@ func NewAuthHandler(authUseCase usecase.AuthUseCase, jwtService *jwt.JWTService)
 	}
 }
 
+func writeJSON(w http.ResponseWriter, statusCode int, status string, message string, data interface{}) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(statusCode)
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"status":  status,
+		"code":    statusCode,
+		"message": message,
+		"data":    data,
+	})
+}
+
 func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 	var req entity.UserRegisterRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		writeJSON(w, http.StatusBadRequest, "error", "Invalid request body", nil)
 		return
 	}
-	
+
 	if req.Email == "" || req.Password == "" || req.Username == "" {
-		http.Error(w, "Please provide all required fields", http.StatusBadRequest)
+		writeJSON(w, http.StatusBadRequest, "error", "Please provide all required fields", nil)
 		return
 	}
 
 	user, token, err := h.authUseCase.Register(r.Context(), &req)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		writeJSON(w, http.StatusConflict, "error", err.Error(), nil)
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(entity.RegisterResponse{
+	resp := entity.RegisterResponse{
 		Token: token,
 		User:  *user,
-	})
+	}
+	writeJSON(w, http.StatusCreated, "success", "User registered successfully", resp)
 }
 
 func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	var req entity.UserLoginRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		writeJSON(w, http.StatusBadRequest, "error", "Invalid request body", nil)
+		return
+	}
+
+	if req.Email == "" || req.Password == "" {
+		writeJSON(w, http.StatusBadRequest, "error", "Email and password are required", nil)
 		return
 	}
 
 	user, token, err := h.authUseCase.Login(r.Context(), &req)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		writeJSON(w, http.StatusUnauthorized, "error", err.Error(), nil)
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(entity.LoginResponse{
+	resp := entity.LoginResponse{
 		Token: token,
 		User:  *user,
-	})
+	}
+	writeJSON(w, http.StatusOK, "success", "Login successful", resp)
 }

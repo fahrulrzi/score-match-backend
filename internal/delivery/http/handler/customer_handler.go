@@ -42,3 +42,13 @@ func (c *CustomerHandler) GetFinalScore(w http.ResponseWriter, r *http.Request) 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(res)
 }
+
+func (c *CustomerHandler) GetAllCustomers(w http.ResponseWriter, r *http.Request) {
+	customers, err := c.customerUseCase.GetAllCustomers(r.Context())
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(customers)
+}

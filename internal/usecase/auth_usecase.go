@@ -33,7 +33,7 @@ func (a *authUseCase) Register(ctx context.Context, userRegister *entity.UserReg
 	}
 
 	if existingUser != nil {
-		return nil, "", errors.New("user with this email already exists")
+		return nil, "", errors.New("User with this email already exists")
 	}
 
 	hashedPassword, err := hash.HashPassword(userRegister.Password)

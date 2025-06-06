@@ -122,10 +122,14 @@ func (c *customerUseCase) Create(ctx context.Context, customer *entity.Customer)
 // 	panic("unimplemented")
 // }
 
-// // GetAllCustomers implements CustomerUseCase.
-// func (c *customerUseCase) GetAllCustomers(ctx context.Context) ([]entity.Customer, error) {
-// 	panic("unimplemented")
-// }
+// GetAllCustomers implements CustomerUseCase.
+func (c *customerUseCase) GetAllCustomers(ctx context.Context) ([]entity.Customer, error) {
+	customers, err := c.customerRepo.GetAllCustomers(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return customers, nil
+}
 
 // // GetCustomerById implements CustomerUseCase.
 // func (c *customerUseCase) GetCustomerById(ctx context.Context, id uint) (*entity.Customer, error) {

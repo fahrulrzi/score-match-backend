@@ -11,6 +11,7 @@ import (
 
 	"github.com/fahrulrzi/score-match-backend/configs"
 	"github.com/fahrulrzi/score-match-backend/internal/delivery/http/handler"
+	"github.com/fahrulrzi/score-match-backend/internal/delivery/http/middleware"
 	"github.com/fahrulrzi/score-match-backend/internal/delivery/http/routes"
 	"github.com/fahrulrzi/score-match-backend/internal/infrastructure/database"
 	"github.com/fahrulrzi/score-match-backend/internal/repository/postgres"
@@ -41,6 +42,7 @@ func main() {
 	}
 
 	// Initialize repositories
+	tokenRepo := postgres.NewTokenRepository(db)
 	userRepo := postgres.NewUserRepository(db)
 	customerRepo := postgres.NewCustomerRepository(db)
 
@@ -54,10 +56,11 @@ func main() {
 	// Initialize HTTP handlers
 	authHandler := handler.NewAuthHandler(authUseCase, jwtService)
 	customerHandler := handler.NewCustomerHandler(customerUseCase)
+	authMiddleware := middleware.NewAuthMiddleware(jwtService, tokenRepo)
 
 	// Initialize router
 	router := mux.NewRouter()
-	routes.SetupRoutes(router, authHandler, customerHandler)
+	routes.SetupRoutes(router, authMiddleware, authHandler, customerHandler)
 
 	// Setup CORS middleware
 	corsMiddleware := cors.New(cors.Options{

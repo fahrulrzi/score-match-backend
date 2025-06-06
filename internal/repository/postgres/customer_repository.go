@@ -34,7 +34,7 @@ func (r *CustomerRepository) Create(ctx context.Context, customer *entity.Custom
 }
 
 func (r *CustomerRepository) GetAllCustomers(ctx context.Context) ([]entity.Customer, error) {
-	query := `SELECT id, name, job, income, age, score, status, describe, created_at, updated_at FROM customers`
+	query := `SELECT id, name, job, income, age, score, status, describe, created_at, updated_at FROM customers ORDER BY created_at DESC`
 
 	rows, err := r.db.QueryContext(ctx, query)
 	if err != nil {

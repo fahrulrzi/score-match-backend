@@ -13,7 +13,7 @@ type AuthUseCase interface {
 
 type CustomerUseCase interface {
 	Create(ctx context.Context, customer *entity.Customer) error
-	// GetAllCustomers(ctx context.Context) ([]entity.Customer, error)
+	GetAllCustomers(ctx context.Context) ([]entity.Customer, error)
 	GetFinalScore(ctx context.Context, customer *entity.CustomerRequest) (*entity.Customer, error)
 	// DeleteCustomer(ctx context.Context, id uint) error
 	// GetCustomerById(ctx context.Context, id uint) (*entity.Customer, error)
