@@ -45,7 +45,7 @@ const CreateTablesSQL = `
 		id SERIAL PRIMARY KEY,
 		name VARCHAR(255) NOT NULL,
 		job VARCHAR(255) NOT NULL,
-		income INT NOT NULL,
+		income BIGINT NOT NULL,
 		age INT NOT NULL,
 		score INT NOT NULL,
 		status TEXT NOT NULL,

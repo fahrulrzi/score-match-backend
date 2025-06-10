@@ -19,5 +19,6 @@ type CustomerUseCase interface {
 	// GetCustomerById(ctx context.Context, id uint) (*entity.Customer, error)
 	GetScore(ctx context.Context, category, value string) int
 	GetDBRScore(ctx context.Context, dbr float64) int
-	GetInform(ctx context.Context, score int) (*entity.CustomerScoreResponse, error)
+	GetInform(ctx context.Context, score int, dbr float64) (*entity.CustomerScoreResponse, error)
+	
 }

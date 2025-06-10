@@ -2,6 +2,8 @@ package usecase
 
 import (
 	"context"
+	"fmt"
+	"strings"
 
 	"github.com/fahrulrzi/score-match-backend/internal/entity"
 	"github.com/fahrulrzi/score-match-backend/internal/repository"
@@ -17,8 +19,28 @@ func NewCustomerUseCase(customerRepo repository.CustomerRepository) CustomerUseC
 	}
 }
 
+func FormatRupiah(amount float64) string {
+	// Ubah ke int biar nggak ribet sama desimal
+	amountInt := int64(amount)
+	result := fmt.Sprintf("Rp. %s", formatWithThousandSeparator(amountInt))
+	return result
+}
+
+func formatWithThousandSeparator(n int64) string {
+	str := fmt.Sprintf("%d", n)
+	var result []string
+	for len(str) > 3 {
+		result = append([]string{str[len(str)-3:]}, result...)
+		str = str[:len(str)-3]
+	}
+	if str != "" {
+		result = append([]string{str}, result...)
+	}
+	return strings.Join(result, ".")
+}
+
 // GetInform implements CustomerUseCase.
-func (c *customerUseCase) GetInform(ctx context.Context, score int) (*entity.CustomerScoreResponse, error) {
+func (c *customerUseCase) GetInform(ctx context.Context, score int, dbr float64) (*entity.CustomerScoreResponse, error) {
 	var response entity.CustomerScoreResponse
 	switch {
 	case score >= 80 && score <= 100:
@@ -28,7 +50,7 @@ func (c *customerUseCase) GetInform(ctx context.Context, score int) (*entity.Cus
 	case score >= 60 && score < 80:
 		response.Score = score
 		response.Status = "Diproses"
-		response.Describe = "SKOR Kredit Adalah Dipertimbangkan"
+		response.Describe = `Pengajuan kredit dipertimbangkan. Bisa ditolak karena skor dan DBR tidak sesuai, bisa diterima maksimal sebesar ` + FormatRupiah(dbr)
 	default:
 		response.Score = score
 		response.Status = "Ditolak"
@@ -81,13 +103,15 @@ func (c *customerUseCase) GetFinalScore(ctx context.Context, customer *entity.Cu
 	DBR := (float64(customer.Installment) / float64(customer.Income)) * 100
 	DBRScore := c.GetDBRScore(ctx, float64(DBR))
 
+	maxRent := (40 - DBR) / 100 * float64(customer.Income)
+
 	final.Username = customer.Username
 	final.Job = customer.Job
 	final.Income = customer.Income
 	final.Age = customer.Age
 	final.Score = (jobScore + lengthOfWorkScore + purposeScore + collateralScore + maritalStatusScore + DBRScore) / 6
 
-	inform, err := c.GetInform(ctx, final.Score)
+	inform, err := c.GetInform(ctx, final.Score, maxRent)
 	if err != nil {
 		return nil, err
 	}
